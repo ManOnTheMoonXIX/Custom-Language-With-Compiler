@@ -202,9 +202,9 @@
         padding: 0.75rem;
         font-family: "Fira Code", monospace;
         font-size: 0.875rem;
-        white-space: pre-wrap;
+        white-space: nowrap;
         color: var(--text-white);
-        line-height: 1.7;
+        line-height: 1;
         overflow-x: auto;
       }
 
@@ -214,20 +214,21 @@
       }
 
       .terminal-container {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1rem;
-        height: 600px;
+        display: flex;
+        justify-content: center;
+        max-width: 800px;
+        margin: 0 auto;
+        height: 700px;
       }
 
       @media (max-width: 768px) {
         .terminal-container {
-          grid-template-columns: 1fr;
-          height: auto;
+          height: 500px;
         }
       }
 
       .terminal-panel {
+        width: 100%;
         background-color: var(--bg-dark);
         border-radius: 0.5rem;
         overflow: hidden;
