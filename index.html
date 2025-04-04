@@ -666,45 +666,6 @@
 
         appendToOutput(`>> ${command}`, true);
         input.value = "";
-
-        // Simulate server response
-        setTimeout(() => {
-          let response;
-
-          if (command.match(/^LIST/i)) {
-            response =
-              'Events in Kingston:\n1. "Mello Vibes" at Sabina Park (2025-04-20 to 2025-04-21)\n2. "Kingston to Montego Bay" at Bus Terminal (2025-06-01)';
-          } else if (command.match(/^ADD/i)) {
-            response =
-              "Event added successfully! Event ID: #" +
-              Math.floor(1000 + Math.random() * 9000);
-          } else if (command.match(/^BOOK/i)) {
-            response =
-              "Booking created! Booking ID: #" +
-              Math.floor(1000 + Math.random() * 9000);
-          } else if (command.match(/^CONFIRM/i)) {
-            response = "Booking #1001 confirmed successfully!";
-          } else if (command.match(/^PAY/i)) {
-            response =
-              "Payment processed for booking #1001. Receipt sent to email.";
-          } else if (command.match(/^CANCEL/i)) {
-            response = "Booking #1001 has been cancelled.";
-          } else if (command.match(/^UPDATE/i)) {
-            response =
-              'Event "Mello Vibes" updated with 20 new tickets. New total: 100 tickets.';
-          } else if (command.match(/^CLEAR/i)) {
-            clearTerminal();
-            return;
-          } else if (command.match(/^HELP/i)) {
-            response =
-              "Available commands:\n- ADD: Add a new event\n- BOOK: Book tickets for an event\n- CANCEL: Cancel a booking\n- CONFIRM: Confirm a booking\n- LIST: List events in a location\n- PAY: Pay for a booking\n- UPDATE: Update ticket availability\n- CLEAR: Clear terminal";
-          } else {
-            response =
-              'Error: Unknown command. Type "HELP" for available commands.';
-          }
-
-          appendToOutput(response);
-        }, 300);
       }
 
       function appendToOutput(text, isCommand = false) {
@@ -743,13 +704,6 @@
       window.onload = function () {
         appendToOutput("Welcome to QuickTix Terminal v1.0.0");
         appendToOutput("Type your SadeScript commands below:");
-
-        // Add event listener for Enter key
-        input.addEventListener("keydown", function (e) {
-          if (e.key === "Enter") {
-            sendCommand();
-          }
-        });
       };
     </script>
   </body>
