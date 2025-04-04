@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>QuickTix - Terminal Booking Platform</title>
+    <title>QuickTix</title>
     <link
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap"
@@ -315,10 +315,8 @@
 
       .terminal-input-area {
         display: flex;
-        flex-direction: column;
-        gap: 1rem;
         padding: 1rem;
-        flex: 1;
+        gap: 10px;
       }
 
       .terminal-input {
@@ -327,10 +325,9 @@
         border: 1px solid var(--border-color);
         border-radius: 0.375rem;
         color: var(--text-white);
-        padding: 1rem;
+        padding: 0.75rem;
         font-family: "Fira Code", monospace;
         font-size: 0.875rem;
-        resize: none;
         outline: none;
       }
 
@@ -343,7 +340,6 @@
       }
 
       .terminal-run-button {
-        align-self: flex-end;
         display: flex;
         align-items: center;
         gap: 0.25rem;
@@ -351,7 +347,7 @@
         color: var(--text-white);
         border: none;
         border-radius: 0.375rem;
-        padding: 0.75rem 1.5rem;
+        padding: 0.75rem 1rem;
         font-size: 0.875rem;
         font-weight: 500;
         cursor: pointer;
@@ -383,6 +379,14 @@
         .command-cards {
           grid-template-columns: 1fr;
         }
+
+        .terminal-input-area {
+          flex-direction: column;
+        }
+
+        .terminal-run-button {
+          align-self: flex-end;
+        }
       }
 
       .active {
@@ -407,7 +411,7 @@
             <button
               class="nav-button active"
               id="home-btn"
-              onclick="showPage('home')"
+              onclick="showHome()"
             >
               <span>🏠</span>
               <span>Home</span>
@@ -416,7 +420,7 @@
             <button
               class="nav-button"
               id="terminal-btn"
-              onclick="showPage('terminal')"
+              onclick="showTerminal()"
             >
               <span>💻</span>
               <span>Terminal</span>
@@ -428,10 +432,11 @@
 
     <main class="main">
       <div class="container">
+        <!-- Home page section -->
         <div id="home" class="content home active">
           <h1>Welcome to QuickTix</h1>
           <p>
-            Terminal-style booking platform powered by
+            QuickTix is your terminal-style booking platform powered by
             <strong>SadeScript</strong>
           </p>
 
@@ -481,7 +486,8 @@
                     <span class="number">20</span>
                     <span class="keyword">TO</span>
                     <span class="number">40</span>
-
+                  </div>
+                  <div class="command-code" style="margin-top: 10px">
                     <span class="keyword">ADD</span>
                     <span class="keyword">CONCERT</span>
                     <span class="string">"Mello Vibes"</span>
@@ -595,30 +601,9 @@
           </section>
         </div>
 
+        <!-- Terminal CLI section -->
         <div id="terminal" class="content terminal hidden">
           <div class="terminal-container">
-            <!-- Left panel for input -->
-            <div class="terminal-panel">
-              <div class="terminal-header">
-                <div class="terminal-controls">
-                  <div class="terminal-dot terminal-dot-red"></div>
-                  <div class="terminal-dot terminal-dot-yellow"></div>
-                  <div class="terminal-dot terminal-dot-green"></div>
-                </div>
-                <span class="terminal-title">Input</span>
-              </div>
-              <div class="terminal-input-area">
-                <textarea
-                  id="terminal-input"
-                  class="terminal-input"
-                  placeholder="Enter SadeScript command..."
-                  autocomplete="off"
-                ></textarea>
-                <button id="run-button" class="terminal-run-button">Run</button>
-              </div>
-            </div>
-
-            <!-- Right panel for output -->
             <div class="terminal-panel">
               <div class="terminal-header">
                 <div class="terminal-controls">
@@ -631,13 +616,16 @@
                   Clear
                 </button>
               </div>
-              <div id="terminal-output" class="terminal-output">
-                <div class="terminal-output-line terminal-output-response">
-                  Welcome to QuickTix Terminal v1.0.0
-                </div>
-                <div class="terminal-output-line terminal-output-response">
-                  Type your SadeScript commands below:
-                </div>
+              <div id="output" class="terminal-output"></div>
+              <div class="terminal-input-area">
+                <input
+                  id="input"
+                  class="terminal-input"
+                  placeholder="Enter command..."
+                  autocomplete="off"
+                  autofocus
+                />
+                <button id="sendBtn" class="terminal-run-button">Send</button>
               </div>
             </div>
           </div>
@@ -646,48 +634,39 @@
     </main>
 
     <script>
-      // Page navigation
-      function showPage(page) {
-        document
-          .getElementById("home-btn")
-          .classList.toggle("active", page === "home");
-        document
-          .getElementById("terminal-btn")
-          .classList.toggle("active", page === "terminal");
-
-        document
-          .getElementById("home")
-          .classList.toggle("active", page === "home");
-        document
-          .getElementById("home")
-          .classList.toggle("hidden", page !== "home");
-        document
-          .getElementById("terminal")
-          .classList.toggle("active", page === "terminal");
-        document
-          .getElementById("terminal")
-          .classList.toggle("hidden", page !== "terminal");
-
-        if (page === "terminal") {
-          document.getElementById("terminal-input").focus();
-        }
+      function showHome() {
+        document.getElementById("home").classList.remove("hidden");
+        document.getElementById("home").classList.add("active");
+        document.getElementById("terminal").classList.add("hidden");
+        document.getElementById("terminal").classList.remove("active");
+        document.getElementById("home-btn").classList.add("active");
+        document.getElementById("terminal-btn").classList.remove("active");
       }
 
-      // Terminal functionality
-      const terminalInput = document.getElementById("terminal-input");
-      const terminalOutput = document.getElementById("terminal-output");
-      const runButton = document.getElementById("run-button");
+      function showTerminal() {
+        document.getElementById("terminal").classList.remove("hidden");
+        document.getElementById("terminal").classList.add("active");
+        document.getElementById("home").classList.add("hidden");
+        document.getElementById("home").classList.remove("active");
+        document.getElementById("terminal-btn").classList.add("active");
+        document.getElementById("home-btn").classList.remove("active");
+        document.getElementById("input").focus();
+      }
+
+      const input = document.getElementById("input");
+      const output = document.getElementById("output");
+
+      document.getElementById("sendBtn").addEventListener("click", sendCommand);
 
       function sendCommand() {
-        const command = terminalInput.value
-          .replace(/[""]/g, '"')
-          .replace(/['']/g, "'");
+        const command = input.value.replace(/[""]/g, '"').replace(/['']/g, "'");
 
         if (command.trim() === "") return;
 
-        addOutputLine(command, true);
-        terminalInput.value = "";
+        appendToOutput(`>> ${command}`, true);
+        input.value = "";
 
+        // Simulate server response
         setTimeout(() => {
           let response;
 
@@ -723,11 +702,11 @@
               'Error: Unknown command. Type "HELP" for available commands.';
           }
 
-          addOutputLine(response, false);
+          appendToOutput(response);
         }, 300);
       }
 
-      function addOutputLine(text, isCommand) {
+      function appendToOutput(text, isCommand = false) {
         const line = document.createElement("div");
         line.className = `terminal-output-line ${
           isCommand ? "terminal-output-command" : "terminal-output-response"
@@ -739,8 +718,8 @@
           line.textContent = text;
         }
 
-        terminalOutput.appendChild(line);
-        terminalOutput.scrollTop = terminalOutput.scrollHeight;
+        output.appendChild(line);
+        output.scrollTop = output.scrollHeight;
       }
 
       function highlightCommand(text) {
@@ -754,20 +733,23 @@
       }
 
       function clearTerminal() {
-        terminalOutput.innerHTML = "";
-        addOutputLine("Terminal cleared.", false);
-        addOutputLine("Type your SadeScript commands below:", false);
+        output.innerHTML = "";
+        appendToOutput("Terminal cleared.");
+        appendToOutput("Type your SadeScript commands below:");
       }
 
-      // Event listeners
-      terminalInput.addEventListener("keydown", function (e) {
-        if (e.key === "Enter" && !e.shiftKey) {
-          e.preventDefault(); // Prevent new line on Enter
-          sendCommand();
-        }
-      });
+      // Initialize the terminal with welcome message
+      window.onload = function () {
+        appendToOutput("Welcome to QuickTix Terminal v1.0.0");
+        appendToOutput("Type your SadeScript commands below:");
 
-      runButton.addEventListener("click", sendCommand);
+        // Add event listener for Enter key
+        input.addEventListener("keydown", function (e) {
+          if (e.key === "Enter") {
+            sendCommand();
+          }
+        });
+      };
     </script>
   </body>
 </html>
