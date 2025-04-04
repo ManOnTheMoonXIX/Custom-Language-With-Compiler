@@ -634,6 +634,8 @@
       </div>
     </main>
 
+    <!-- IMPORTANT: DO NOT REMOVE THIS SCRIPT TAG OR THIS VERY COMMENT! -->
+    <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
     <script>
       function showHome() {
         document.getElementById("home").classList.remove("hidden");
@@ -666,7 +668,23 @@
 
         appendToOutput(`>> ${command}`, true);
         input.value = "";
+
+        // Added the fetch call from the original file to ensure backend connection works
+        fetch("/run", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ command }),
+        })
+          .then((res) => res.text())
+          .then((data) => appendToOutput(data))
+          .catch((error) => appendToOutput(`Error: ${error.message}`));
       }
+
+      input.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") {
+          sendCommand();
+        }
+      });
 
       function appendToOutput(text, isCommand = false) {
         const line = document.createElement("div");
