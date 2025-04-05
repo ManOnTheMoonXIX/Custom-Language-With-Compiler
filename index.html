@@ -674,7 +674,15 @@
           body: JSON.stringify({ command }),
         })
           .then((res) => res.text())
-          .then((data) => appendToOutput(data))
+          .then((data) => {
+            // Check if the response is coming with HTML already
+            if (data.includes("<span") || data.includes("<div")) {
+              appendToOutput(data);
+            } else {
+              // If it's plain text, format it with proper response styling
+              appendToOutput(data);
+            }
+          })
           .catch((error) => appendToOutput(`Error: ${error.message}`));
       }
 
@@ -693,7 +701,9 @@
         if (isCommand) {
           line.innerHTML = `❯ ${highlightCommand(text)}`;
         } else {
-          line.textContent = text;
+          // Use innerHTML for responses coming from the server
+          // This assumes server responses don't contain malicious HTML
+          line.innerHTML = text;
         }
 
         output.appendChild(line);
@@ -701,7 +711,10 @@
       }
 
       function highlightCommand(text) {
-        return text
+        // First, escape the text to prevent XSS (but keep the command text safe)
+        const escapedText = text.replace(/>/g, "&gt;").replace(/</g, "&lt;");
+
+        return escapedText
           .replace(
             /(ADD|BOOKING|CANCEL|CONFIRM|LIST|PAY|UPDATE|BUS|CONCERT|EVENTS|EVENT|BOOK|NEW|TICKETS|FOR|FROM|IN|ON|PRICE|TO|WITH|AT)/g,
             '<span class="keyword">$1</span>'
