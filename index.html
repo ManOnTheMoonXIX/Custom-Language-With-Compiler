@@ -376,6 +376,23 @@
         color: var(--number);
       }
 
+      /* Fixed styles for terminal output highlighting */
+      .terminal-output-response .keyword {
+        color: var(--keyword) !important;
+      }
+
+      .terminal-output-response .string {
+        color: var(--string) !important;
+      }
+
+      .terminal-output-response .number {
+        color: var(--number) !important;
+      }
+
+      .terminal-output-response .command {
+        color: var(--command) !important;
+      }
+
       @media (max-width: 640px) {
         .command-cards {
           grid-template-columns: 1fr;
@@ -701,9 +718,14 @@
         if (isCommand) {
           line.innerHTML = `❯ ${highlightCommand(text)}`;
         } else {
-          // Use innerHTML for responses coming from the server
-          // This assumes server responses don't contain malicious HTML
-          line.innerHTML = text;
+          // Fix for "keyword"> showing up in terminal
+          const formattedText = text
+            .replace(/"keyword">/g, 'class="keyword">')
+            .replace(/"string">/g, 'class="string">')
+            .replace(/"number">/g, 'class="number">')
+            .replace(/"command">/g, 'class="command">');
+
+          line.innerHTML = formattedText;
         }
 
         output.appendChild(line);
@@ -715,6 +737,18 @@
         const escapedText = text.replace(/>/g, "&gt;").replace(/</g, "&lt;");
 
         return escapedText
+          .replace(
+            /(ADD|BOOK|CANCEL|CONFIRM|LIST|PAY|UPDATE|BUS|CONCERT|EVENTS|EVENT|BOOKING|NEW|TICKETS|FOR|FROM|IN|ON|PRICE|TO|WITH|AT)/g,
+            '<span class="keyword">$1</span>'
+          )
+          .replace(/("[^"]*")/g, '<span class="string">$1</span>')
+          .replace(/(\d+(?:-\d+)?)/g, '<span class="number">$1</span>');
+      }
+
+      // Optional: Process server response to highlight keywords
+      function processServerResponse(text) {
+        // Similar to highlightCommand but for server responses
+        return text
           .replace(
             /(ADD|BOOK|CANCEL|CONFIRM|LIST|PAY|UPDATE|BUS|CONCERT|EVENTS|EVENT|BOOKING|NEW|TICKETS|FOR|FROM|IN|ON|PRICE|TO|WITH|AT)/g,
             '<span class="keyword">$1</span>'
