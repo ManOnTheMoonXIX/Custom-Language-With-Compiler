@@ -1,3 +1,10 @@
+# Group Members: 
+# Justin Alder 2007273
+# Daryn Brown 2002414
+# Marvis Haughton 1802529
+# Peta Gaye Mundle 1403906 
+# Cassandra Powell 2005742
+
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
