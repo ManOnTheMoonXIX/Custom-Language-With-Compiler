@@ -1,21 +1,6 @@
-# Group Members: 
-# Justin Alder 2007273
-# Daryn Brown 2002414
-# Marvis Haughton 1802529
-# Peta Gaye Mundle 1403906 
-# Cassandra Powell 2005742
-
-
 import ply.lex as lex
 
-# Group Members: 
-# Justin Alder 2007273
-# Daryn Brown 2002414
-# Marvis Haughton 1802529
-# Peta Gaye Mundle 1403906 
-# Cassandra Powell 2005742
-
-# Reserved Words
+# Reserved Words (excluding types like CONCERT, MOVIE)
 reserved = {
     'LIST': 'LIST',
     'EVENTS': 'EVENTS',
@@ -45,43 +30,27 @@ tokens = [
 ] + list(reserved.values())
 
 # Token Patterns
-def t_STRING(t):
-    r'["""][^"""]+["""]|"[^"]*"'  # Match both types of quotes
-    # Remove quotes - handles both regular quotes and fancy quotes
-    if t.value.startswith('"') and t.value.endswith('"'):
-        t.value = t.value[1:-1]
-    else:
-        t.value = t.value.strip('"""')
-    return t
+t_NUMBER = r'\d+'
 
 def t_DATE(t):
     r'\d{4}-\d{2}-\d{2}'
     return t
 
-def t_NUMBER(t):
-    r'\d+'
-    t.value = int(t.value)
+def t_STRING(t):
+    r'["“”][^"“”]+["“”]'  # Only match quoted strings
+    t.value = t.value.strip('"“”')
     return t
 
-# Word must come after all exact token matches
+
 def t_WORD(t):
-    r'[a-zA-Z][a-zA-Z0-9_]*'  # Simplified pattern to avoid conflicts
-    # Check if this word is a reserved keyword
-    t.type = reserved.get(t.value.upper(), 'WORD')
+    r'\b[a-zA-Z_][a-zA-Z0-9_]*\b'
+    t.type = reserved.get(t.value.upper(), 'WORD')  # Reserved or generic WORD
     return t
 
-# Define a rule so we can track line numbers
-def t_newline(t):
-    r'\n+'
-    t.lexer.lineno += len(t.value)
-
-# A string containing ignored characters (spaces and tabs)
 t_ignore = ' \t\r\n'
 
-# Error handling rule
 def t_error(t):
-    print(f"Invalid character '{t.value[0]}' in command. Please check the command syntax.")
+    print(f"Illegal character {t.value[0]}")
     t.lexer.skip(1)
 
-# Build the lexer
 lexer = lex.lex()

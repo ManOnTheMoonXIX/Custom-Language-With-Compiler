@@ -188,24 +188,34 @@ def p_book_event(p):
             date = p[4]  # This is already a DATE token, no need to strip quotes
             user = p[6].strip('"')
             
-            # Find event by title and date
-            query = f"SELECT * FROM c WHERE c.title = '{title}' AND c.startDate = '{date}' AND c.type = 'event'"
+            # Modified query to be more inclusive - not filtering by type
+            query = f"SELECT * FROM c WHERE c.title = '{title}' AND c.startDate = '{date}'"
             events = list(container.query_items(query=query, enable_cross_partition_query=True))
             
+            # If no results, try a more flexible search
             if not events:
-                # Try to find the event by title only to provide better error message
-                title_query = f"SELECT * FROM c WHERE c.title = '{title}' AND c.type = 'event'"
+                # Try finding by title only
+                title_query = f"SELECT * FROM c WHERE c.title = '{title}'"
                 title_events = list(container.query_items(query=title_query, enable_cross_partition_query=True))
                 
+                # If still no results, try a more flexible title search
                 if not title_events:
-                    p[0] = f"No event found with title '{title}'"
+                    flexible_query = f"SELECT * FROM c WHERE CONTAINS(c.title, '{title}')"
+                    flexible_events = list(container.query_items(query=flexible_query, enable_cross_partition_query=True))
+                    
+                    if flexible_events:
+                        p[0] = f"No exact match for '{title}' on {date}. Similar events found:\n" + "\n".join([f"- {e.get('title')} on {e.get('startDate')}" for e in flexible_events])
+                    else:
+                        p[0] = f"No event found with title '{title}'"
+                    return
                 else:
-                    available_dates = [e['startDate'] for e in title_events]
+                    available_dates = [e.get('startDate', 'unknown date') for e in title_events]
                     p[0] = f"Event '{title}' exists but not on {date}. Available dates: {', '.join(available_dates)}"
-                return
+                    return
                 
             event = events[0]
-            if event['available_tickets'] <= 0:
+            
+            if event.get('available_tickets', 0) <= 0:
                 p[0] = "No tickets available"
                 return
                 
@@ -396,8 +406,8 @@ def p_word_command(p):
 # Improved error handling
 def p_error(p):
     if p:
-        print(f"Syntax error at '{p.value}', token type: {p.type}")
+        return f"Syntax error: unexpected '{p.value}'"
     else:
-        print("Syntax error at end of input.")
+        return "Syntax error: unexpected end of command"
 
 parser = yacc.yacc(debug=False, write_tables=False) 
