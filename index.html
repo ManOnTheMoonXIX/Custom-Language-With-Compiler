@@ -716,7 +716,7 @@
 
         return escapedText
           .replace(
-            /(ADD|BOOKING|CANCEL|CONFIRM|LIST|PAY|UPDATE|BUS|CONCERT|EVENTS|EVENT|BOOK|NEW|TICKETS|FOR|FROM|IN|ON|PRICE|TO|WITH|AT)/g,
+            /(ADD|BOOK|CANCEL|CONFIRM|LIST|PAY|UPDATE|BUS|CONCERT|EVENTS|EVENT|BOOKING|NEW|TICKETS|FOR|FROM|IN|ON|PRICE|TO|WITH|AT)/g,
             '<span class="keyword">$1</span>'
           )
           .replace(/("[^"]*")/g, '<span class="string">$1</span>')
