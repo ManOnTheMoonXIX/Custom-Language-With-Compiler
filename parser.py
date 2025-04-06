@@ -1,4 +1,4 @@
-import os
+import os, random
 import ply.yacc as yacc
 from dotenv import load_dotenv
 from lexer import tokens  # Import token definitions from lexer.py
@@ -23,6 +23,9 @@ events = { "Coldplay Concert": 50 }  # {event_name: available_tickets}
 booking_id_counter = 1000
 
 # Parsing Rules
+
+def generate_booking_code():
+    return f"QTX-{random.randint(1000, 9999)}"
 
 def p_add_event(p):
     'command : ADD WORD STRING AT STRING IN STRING FROM DATE TO DATE PRICE NUMBER TO NUMBER'
@@ -68,10 +71,21 @@ def p_list_events(p):
     except Exception as e:
         print(f"❌ Failed to fetch events: {e}")
 
+def p_list_all_events(p):
+    'command : LIST EVENTS'
+    print("📍 All Events:")
+    try:
+        query = "SELECT * FROM c"
+        for item in container.query_items(query=query, enable_cross_partition_query=True):
+            print(f"- {item['title']} ({item.get('type', 'event')}) at {item['venue']} in {item['location']} from {item['startDate']} to {item['endDate']}, "
+                  f"${item['priceMin']} - ${item['priceMax']} ({item['available_tickets']} tickets left)")
+    except Exception as e:
+        print(f"❌ Failed to fetch events: {e}")
+
+
 
 def p_book_event(p):
     'command : BOOK STRING ON DATE FOR STRING'
-    global booking_id_counter
     title = p[2].strip('"')
     date = p[4]
     user = p[6].strip('"')
@@ -88,53 +102,73 @@ def p_book_event(p):
             print("❌ No tickets available.")
             return
 
-        # Decrease ticket count
         event['available_tickets'] -= 1
         container.replace_item(event['id'], event)
 
-        # Store booking
-        bookings[booking_id_counter] = (event['id'], user, date, "booked")
-        print(f"✅ Booking confirmed! ID: #{booking_id_counter}")
-        booking_id_counter += 1
+        booking_id = str(uuid.uuid4())
+        booking_code = generate_booking_code()
+
+        booking = {
+            "id": booking_id,
+            "code": booking_code,
+            "type": "booking",
+            "event_id": event["id"],
+            "user": user,
+            "date": date,
+            "status": "booked"
+        }
+        container.upsert_item(booking)
+        print(f"✅ Booking logged! ID: #{booking_code}")
 
     except Exception as e:
         print(f"❌ Booking error: {e}")
 
+
 def p_confirm_booking(p):
-    'command : CONFIRM BOOKING NUMBER'
-    booking_id = int(p[3])
-    if booking_id in bookings:
-        data = bookings[booking_id]
-        bookings[booking_id] = (data[0], data[1], data[2], "confirmed")
-        print(f"✅ Booking #{booking_id} confirmed.")
+    'command : CONFIRM BOOKING STRING'
+    code = p[3].strip('"')
+    query = f"SELECT * FROM c WHERE c.code = '{code}' AND c.type = 'booking'"
+    results = list(container.query_items(query=query, enable_cross_partition_query=True))
+    if results:
+        booking = results[0]
+        booking["status"] = "confirmed"
+        container.replace_item(booking["id"], booking)
+        print(f"✅ Booking {code} confirmed.")
     else:
         print("❌ Booking ID not found.")
 
 def p_pay_booking(p):
-    'command : PAY FOR BOOKING NUMBER'
-    booking_id = int(p[4])
-    if booking_id in bookings and bookings[booking_id][3] == "confirmed":
-        data = bookings[booking_id]
-        bookings[booking_id] = (data[0], data[1], data[2], "paid")
-        print(f"💳 Payment completed for booking #{booking_id}")
+    'command : PAY FOR BOOKING STRING'
+    code = p[4].strip('"')
+    query = f"SELECT * FROM c WHERE c.code = '{code}' AND c.type = 'booking'"
+    results = list(container.query_items(query=query, enable_cross_partition_query=True))
+    if results and results[0]["status"] == "confirmed":
+        booking = results[0]
+        booking["status"] = "paid"
+        container.replace_item(booking["id"], booking)
+        print(f"💳 Payment completed for booking {code}")
     else:
         print("❌ Booking not confirmed or not found.")
 
+
+
 def p_cancel_booking(p):
-    'command : CANCEL BOOKING NUMBER'
-    booking_id = int(p[3])
-    if booking_id in bookings:
-        event_id, _, _, _ = bookings[booking_id]
-        try:
-            event = container.read_item(event_id, partition_key=event_id)
-            event['available_tickets'] += 1
-            container.replace_item(event_id, event)
-            del bookings[booking_id]
-            print(f"❌ Booking #{booking_id} canceled and ticket restored.")
-        except Exception as e:
-            print(f"❌ Error canceling booking: {e}")
+    'command : CANCEL BOOKING STRING'
+    code = p[3].strip('"')
+    query = f"SELECT * FROM c WHERE c.code = '{code}' AND c.type = 'booking'"
+    results = list(container.query_items(query=query, enable_cross_partition_query=True))
+    if results:
+        booking = results[0]
+        event_id = booking["event_id"]
+        event = container.read_item(event_id, partition_key=event_id)
+        event["available_tickets"] += 1
+        container.replace_item(event_id, event)
+        container.delete_item(booking["id"], partition_key=booking["id"])
+        print(f"❌ Booking {code} canceled and ticket restored.")
     else:
         print("❌ Booking not found.")
+
+
 
 def p_update_event(p):
     'command : UPDATE EVENT STRING WITH NUMBER NEW TICKETS'
@@ -161,4 +195,4 @@ def p_error(p):
     else:
         print("Syntax error at end of input.")
 
-parser = yacc.yacc(debug=True, write_tables=False)
+parser = yacc.yacc(debug=False, write_tables=False)

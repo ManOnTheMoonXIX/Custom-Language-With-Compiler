@@ -37,9 +37,10 @@ def t_DATE(t):
     return t
 
 def t_STRING(t):
-    r'"[^"]*"'
-    t.value = t.value.strip('"')
+    r'["“”][^"“”]+["“”]'  # Only match quoted strings
+    t.value = t.value.strip('"“”')
     return t
+
 
 def t_WORD(t):
     r'\b[a-zA-Z_][a-zA-Z0-9_]*\b'
