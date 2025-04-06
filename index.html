@@ -716,16 +716,9 @@
         }`;
 
         if (isCommand) {
-          line.innerHTML = `❯ ${highlightCommand(text)}`;
+          line.innerHTML = `❯ ${text.substring(3)}`; // Remove the ">> " prefix
         } else {
-          // Fix for "keyword"> showing up in terminal
-          const formattedText = text
-            .replace(/"keyword">/g, 'class="keyword">')
-            .replace(/"string">/g, 'class="string">')
-            .replace(/"number">/g, 'class="number">')
-            .replace(/"command">/g, 'class="command">');
-
-          line.innerHTML = formattedText;
+          line.innerHTML = text;
         }
 
         output.appendChild(line);
@@ -733,8 +726,13 @@
       }
 
       function highlightCommand(text) {
-        // First, escape the text to prevent XSS (but keep the command text safe)
-        const escapedText = text.replace(/>/g, "&gt;").replace(/</g, "&lt;");
+        // Remove the ">> " prefix if it exists
+        const commandText = text.replace(/^>>\s*/, "");
+
+        // Escape HTML characters to prevent XSS
+        const escapedText = commandText
+          .replace(/>/g, "&gt;")
+          .replace(/</g, "&lt;");
 
         return escapedText
           .replace(
