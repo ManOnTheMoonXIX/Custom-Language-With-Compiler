@@ -118,7 +118,7 @@ def p_book_event(p):
             "status": "booked"
         }
         container.upsert_item(booking)
-        print(f"✅ Booking confirmed! ID: #{booking_code}")
+        print(f"✅ Booking logged! ID: #{booking_code}")
 
     except Exception as e:
         print(f"❌ Booking error: {e}")
