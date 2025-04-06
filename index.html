@@ -745,18 +745,6 @@
           .replace(/(\d+(?:-\d+)?)/g, '<span class="number">$1</span>');
       }
 
-      // Optional: Process server response to highlight keywords
-      function processServerResponse(text) {
-        // Similar to highlightCommand but for server responses
-        return text
-          .replace(
-            /(ADD|BOOK|CANCEL|CONFIRM|LIST|PAY|UPDATE|BUS|CONCERT|EVENTS|EVENT|BOOKING|NEW|TICKETS|FOR|FROM|IN|ON|PRICE|TO|WITH|AT)/g,
-            '<span class="keyword">$1</span>'
-          )
-          .replace(/("[^"]*")/g, '<span class="string">$1</span>')
-          .replace(/(\d+(?:-\d+)?)/g, '<span class="number">$1</span>');
-      }
-
       function clearTerminal() {
         output.innerHTML = "";
         appendToOutput("Terminal cleared.");
