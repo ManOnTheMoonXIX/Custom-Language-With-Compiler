@@ -21,7 +21,7 @@ CONTAINER_NAME = os.getenv("COSMOS_CONTAINER")
 
 # Verify environment variables
 if not all([COSMOS_ENDPOINT, COSMOS_KEY, DATABASE_NAME, CONTAINER_NAME]):
-    print("❌ Missing required environment variables. Please check your .env file.")
+    print("[ERROR] Missing required environment variables. Please check your .env file.")
     print("Required variables: COSMOS_ENDPOINT, COSMOS_KEY, COSMOS_DATABASE, COSMOS_CONTAINER")
     exit(1)
 
@@ -32,13 +32,13 @@ try:
     
     # Verify connection by trying to read container properties
     container_props = container.read()
-    print("✅ Successfully connected to Cosmos DB")
+    print("[SUCCESS] Successfully connected to Cosmos DB")
     
     # Add some test events if the container is empty
     query = "SELECT VALUE COUNT(1) FROM c"
     count = list(container.query_items(query=query, enable_cross_partition_query=True))[0]
     if count == 0:
-        print("📝 Adding test events to the database...")
+        print("[INFO] Adding test events to the database...")
         test_events = [
             {
                 "id": str(uuid.uuid4()),
@@ -91,10 +91,10 @@ try:
         ]
         for event in test_events:
             container.upsert_item(event)
-        print("✅ Added test events successfully")
+        print("[SUCCESS] Added test events successfully")
         
 except Exception as e:
-    print(f"❌ Failed to connect to Cosmos DB: {e}")
+    print(f"[ERROR] Failed to connect to Cosmos DB: {e}")
     exit(1)
 
 # Parsing Rules
@@ -406,8 +406,12 @@ def p_word_command(p):
 # Improved error handling
 def p_error(p):
     if p:
-        return f"Syntax error: unexpected '{p.value}'"
+        error_msg = f"Syntax error: unexpected '{p.value}'"
+        print(error_msg)
+        return error_msg
     else:
-        return "Syntax error: unexpected end of command"
+        error_msg = "Syntax error: unexpected end of command"
+        print(error_msg)
+        return error_msg
 
-parser = yacc.yacc(debug=False, write_tables=False) 
+parser = yacc.yacc(debug=False, write_tables=False, errorlog=yacc.NullLogger()) 
