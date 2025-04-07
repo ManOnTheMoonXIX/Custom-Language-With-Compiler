@@ -370,8 +370,8 @@ def p_update_event(p):
         p[0] = f"Error updating event: {str(e)}"
 
 def p_add_event(p):
-    '''add_event : ADD EVENT STRING STRING STRING DATE DATE NUMBER NUMBER NUMBER
-                | ADD EVENT STRING AT STRING IN STRING FROM DATE TO DATE PRICE NUMBER TO NUMBER'''
+    '''add_event : ADD WORD STRING STRING STRING DATE DATE NUMBER NUMBER NUMBER
+                | ADD WORD STRING AT STRING IN STRING FROM DATE TO DATE PRICE NUMBER TO NUMBER'''
     try:
         if len(p) == 11:  # Original format
             title = p[3].strip('"')
