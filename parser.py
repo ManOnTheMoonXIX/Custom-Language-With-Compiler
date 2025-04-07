@@ -118,7 +118,7 @@ def p_list_events(p):
     try:
         if len(p) == 5:  # LIST EVENTS IN STRING
             location = p[4].strip('"')
-            query = f"SELECT * FROM c WHERE c.location = '{location}'"
+            query = f"SELECT * FROM c WHERE c.location = '{location}' AND c.type != 'booking'"
             events = list(container.query_items(query=query, enable_cross_partition_query=True))
             
             if not events:
@@ -127,7 +127,7 @@ def p_list_events(p):
                 
             result = f"\nEvents in {location}:\n"
         else:  # LIST EVENTS
-            query = "SELECT * FROM c"
+            query = "SELECT * FROM c WHERE c.type != 'booking'"
             events = list(container.query_items(query=query, enable_cross_partition_query=True))
             
             if not events:
