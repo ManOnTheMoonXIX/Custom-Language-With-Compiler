@@ -12,6 +12,10 @@ A modern ticket booking system with AI-powered command suggestions
 
 ---
 
+## Try it yourself
+
+Website: https://ticket-cli-web-fzdadsehb5a2fzhj.canadacentral-01.azurewebsites.net/
+
 ## 🌟 Overview
 
 QuickTix-SadeScript is a ticket booking system with a custom domain-specific language (DSL) implementation and an AI-powered CLI interface. The project combines a custom language parser with Google's Gemini AI to provide intelligent command suggestions for ticket booking operations.
